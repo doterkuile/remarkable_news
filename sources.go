@@ -171,33 +171,39 @@ func loadFont(fontdata []byte, size float64) font.Face {
 }
 
 func addCenteredLabel(img draw.Image, y int, face font.Face, label string) {
-	x := img.Bounds().Max.X / 2
-	b, _ := font.BoundString(face, label)
-	label_width := (b.Max.X - b.Min.X).Ceil()
+	maxWidth := img.Bounds().Max.X
+	x := maxWidth / 2
 
-	// Hack: Wrap labels that are too long once
-	if label_width > img.Bounds().Max.X {
-		debug("Label too long, splitting into two lines")
-		left := strings.TrimSpace(label[:len(label)/2])
-		right := strings.TrimSpace(label[len(label)/2:])
-		right_parts := strings.SplitN(right, " ", 2)
-		first_line := left + right_parts[0]
-
-		b, _ = font.BoundString(face, first_line)
-		label_width = (b.Max.X - b.Min.X).Ceil()
-		label_height := (b.Max.Y - b.Min.Y).Ceil()
-		addLabel(img, x-label_width/2, y, face, first_line)
-
-		if len(right_parts) == 2 {
-			second_line := right_parts[1]
-			b, _ = font.BoundString(face, second_line)
-			label_width = (b.Max.X - b.Min.X).Ceil()
-			addLabel(img, x-label_width/2, y+label_height+10, face, second_line)
-		}
-	} else {
-		addLabel(img, x-label_width/2, y, face, label)
+	words := strings.Fields(label)
+	if len(words) == 0 {
+		return
 	}
 
+	var lines []string
+	currentLine := words[0]
+
+	for i := 1; i < len(words); i++ {
+		testLine := currentLine + " " + words[i]
+		b, _ := font.BoundString(face, testLine)
+		testWidth := (b.Max.X - b.Min.X).Ceil()
+
+		if testWidth > maxWidth {
+			lines = append(lines, currentLine)
+			currentLine = words[i]
+		} else {
+			currentLine = testLine
+		}
+	}
+	lines = append(lines, currentLine)
+
+	b, _ := font.BoundString(face, "Ay")
+	lineHeight := (b.Max.Y - b.Min.Y).Ceil() + 10
+
+	for i, line := range lines {
+		b, _ := font.BoundString(face, line)
+		lineWidth := (b.Max.X - b.Min.X).Ceil()
+		addLabel(img, x-lineWidth/2, y+i*lineHeight, face, line)
+	}
 }
 
 func addLabel(img draw.Image, x, y int, face font.Face, label string) {
