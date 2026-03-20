@@ -28,6 +28,7 @@ func main() {
 	output := flag.String("output", "", "output image path")
 	source := flag.String("source", "", "use builtin source and scaling options")
 	format := flag.Bool("strftime", false, "enable strftime formatting in URL")
+	userAgentFlag := flag.String("user-agent", "", "user agent to use for requests")
 	verbose := flag.Bool("verbose", false, "enable debug output")
 	xpath := flag.String("xpath", "", "xpath to <img> tag in url")
 	xpath_title := flag.String("xpath-title", "", "xpath to title in url")
@@ -50,6 +51,10 @@ func main() {
 
 	if *verbose {
 		LOG_LEVEL = "debug"
+	}
+
+	if *userAgentFlag != "" {
+		UserAgent = *userAgentFlag
 	}
 
 	var title_face font.Face
