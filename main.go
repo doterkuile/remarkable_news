@@ -6,11 +6,23 @@ import (
 	"fmt"
 	"image"
 	"image/draw"
+	"strings"
 	"time"
 
 	"github.com/disintegration/imaging"
 	"golang.org/x/image/font"
 )
+
+type headerFlags []string
+
+func (i *headerFlags) String() string {
+	return ""
+}
+
+func (i *headerFlags) Set(value string) error {
+	*i = append(*i, value)
+	return nil
+}
 
 //go:embed fonts/noto/NotoSans-Bold.ttf
 var notosans_bold_ttf []byte
@@ -28,7 +40,6 @@ func main() {
 	output := flag.String("output", "", "output image path")
 	source := flag.String("source", "", "use builtin source and scaling options")
 	format := flag.Bool("strftime", false, "enable strftime formatting in URL")
-	userAgentFlag := flag.String("user-agent", "", "user agent to use for requests")
 	verbose := flag.Bool("verbose", false, "enable debug output")
 	xpath := flag.String("xpath", "", "xpath to <img> tag in url")
 	xpath_title := flag.String("xpath-title", "", "xpath to title in url")
@@ -47,14 +58,19 @@ func main() {
 	// right := flag.Int("right", 0, "crop from right")
 	// bottom := flag.Int("bottom", 0, "crop from bottom")
 	cooldown := flag.Int("cooldown", 3600, "minimum seconds to wait before attempting download again")
+	var hf headerFlags
+	flag.Var(&hf, "header", "custom headers in 'Key: Value' format (can be used multiple times)")
 	flag.Parse()
 
 	if *verbose {
 		LOG_LEVEL = "debug"
 	}
 
-	if *userAgentFlag != "" {
-		UserAgent = *userAgentFlag
+	for _, h := range hf {
+		parts := strings.SplitN(h, ":", 2)
+		if len(parts) == 2 {
+			Headers[strings.TrimSpace(parts[0])] = strings.TrimSpace(parts[1])
+		}
 	}
 
 	var title_face font.Face

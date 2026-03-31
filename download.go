@@ -13,7 +13,7 @@ import (
 )
 
 var Err404 = errors.New("Err404")
-var UserAgent = ""
+var Headers = make(map[string]string)
 
 func to_absurl(base, rel string) (string, error) {
 	base_url, err := url.Parse(base)
@@ -41,8 +41,8 @@ func get_url(url string) (*http.Response, error){
 		return nil, err
 	}
 
-	if UserAgent != "" {
-		req.Header.Set("User-Agent", UserAgent)
+	for key, value := range Headers {
+		req.Header.Set(key, value)
 	}
 
 	response, err := client.Do(req)

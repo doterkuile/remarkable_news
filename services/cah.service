@@ -7,7 +7,9 @@ ExecStart=/home/root/bin/renews.arm \
     -verbose \
     -cooldown 86400 \
     -url https://www.gocomics.com/calvinandhobbes/%%Y/%%m/%%d \
-    -user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" \
+    -header "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0" \
+    -header "Accept-Language: en" \
+    -header "Accept: */*" \
     -xpath "//img[contains(@class, 'comic') and contains(@class, 'image')]/@src" \
     -strftime \
     -mode fill \
